@@ -1,26 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace CryptoApi.Models
 {
-    public class User
+    public class User : IdentityUser<int>
     {
+        private int _id;
+
         [Key]
-        public int Id { get; set; }
-
-        [Required]
-        public string FirstName { get; set; }
-
-        [Required]
-        public string LastName { get; set; }
-
-        [Required]
-        public string Email { get; set; }
-
-        [Required]
-        public int Age { get; set; }
-
-        public bool IsActive { get; set; }
-
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public override int Id 
+        { 
+            get => _id; 
+            set => _id = value; 
+        }
     }
 }
