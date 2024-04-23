@@ -34,7 +34,7 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>(opt =>
         opt.Password.RequiredLength = 8; 
         opt.User.RequireUniqueEmail = true; 
         opt.Password.RequireNonAlphanumeric = false;
-        opt.SignIn.RequireConfirmedEmail = true; 
+        opt.SignIn.RequireConfirmedEmail = false; 
     })
     .AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
