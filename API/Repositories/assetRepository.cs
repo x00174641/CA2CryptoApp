@@ -10,9 +10,9 @@ namespace CryptoApi.Repositories
 {
     public class AssetRepository
     {
-        private readonly DefaultdbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
 
-        public AssetRepository(DefaultdbContext dbContext)
+        public AssetRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }

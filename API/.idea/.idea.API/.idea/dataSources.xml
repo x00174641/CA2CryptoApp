@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:mysql://db-mysql-lon1-09773-do-user-16195469-0.c.db.ondigitalocean.com:25060/defaultdb</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="MySQL" uuid="9985a623-e739-45ee-9279-7ee920bef84d">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://db-mysql-lon1-09773-do-user-16195469-0.c.db.ondigitalocean.com:25060/defaultdb</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

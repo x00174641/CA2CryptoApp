@@ -145,3 +145,6 @@ C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\obj\Debug\net8.0\refi
 C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\obj\Debug\net8.0\API.pdb
 C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\obj\Debug\net8.0\API.genruntimeconfig.cache
 C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\obj\Debug\net8.0\ref\API.dll
+C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\bin\Debug\net8.0\API.staticwebassets.runtime.json
+C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.UI.dll
+C:\Users\jason\Desktop\CA2_MobileAppFinal\CA3CryptoApp\API\bin\Debug\net8.0\Microsoft.Extensions.FileProviders.Embedded.dll

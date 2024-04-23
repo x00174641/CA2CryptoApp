@@ -7,9 +7,9 @@ namespace CryptoApi.Repositories
 {
     public class UserRepository
     {
-        private readonly DefaultdbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
 
-        public UserRepository(DefaultdbContext dbContext)
+        public UserRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
