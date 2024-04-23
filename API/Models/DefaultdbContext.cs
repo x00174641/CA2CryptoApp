@@ -13,6 +13,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     public DbSet<User> Users { get; set; }
     public DbSet<Asset> Assets { get; set; }
+    
+    public DbSet<CryptoPortfolio> CryptoPortfolio { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
