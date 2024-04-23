@@ -19,5 +19,12 @@ namespace CryptoApi.Repositories
         {
             return _dbContext.CryptoPortfolio.ToList();
         }
+        
+        public IEnumerable<CryptoPortfolio> GetCryptoPortfoliosByUserId(string Id)
+        {
+            return _dbContext.CryptoPortfolio.Where(p => p.Id == Id).ToList();
+        }
+        
+        
     }
 }
