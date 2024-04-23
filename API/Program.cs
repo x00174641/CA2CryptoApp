@@ -15,7 +15,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 // Register DefaultdbContext as a scoped service
 builder.Services.AddDbContext<DefaultdbContext>();
-
+builder.Services.AddScoped<AssetRepository>();
 // Register UserRepository as a scoped service
 builder.Services.AddScoped<UserRepository>();
 

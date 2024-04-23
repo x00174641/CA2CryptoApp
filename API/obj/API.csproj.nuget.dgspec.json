@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vita\\RiderProjects\\API\\API.csproj": {}
+    "C:\\git\\CA3CryptoApp\\API\\API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vita\\RiderProjects\\API\\API.csproj": {
+    "C:\\git\\CA3CryptoApp\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vita\\RiderProjects\\API\\API.csproj",
+        "projectUniqueName": "C:\\git\\CA3CryptoApp\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "C:\\Users\\vita\\RiderProjects\\API\\API.csproj",
+        "projectPath": "C:\\git\\CA3CryptoApp\\API\\API.csproj",
         "packagesPath": "C:\\Users\\vita\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vita\\RiderProjects\\API\\obj\\",
+        "outputPath": "C:\\git\\CA3CryptoApp\\API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vita\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -51,6 +51,10 @@
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.4, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",

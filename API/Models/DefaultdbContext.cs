@@ -8,7 +8,8 @@ namespace API.Models;
 public partial class DefaultdbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
-
+    public DbSet<Asset> Assets { get; set; }
+    
     // Other code...
 }
 public partial class DefaultdbContext : DbContext
