@@ -1,10 +1,13 @@
 ﻿// AssetController.cs
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using CryptoApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using CryptoApi.Repositories;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CryptoApi.Controllers
 {
@@ -19,7 +22,7 @@ namespace CryptoApi.Controllers
             _assetRepository = assetRepository;
         }
 
-        [HttpPost("user/{userId}")]
+        [HttpPost("user/assets/{userId}")]
         public async Task<IActionResult> AddUserAsset(int userId, [FromBody] string assetsJSON)
         {
             var result = await _assetRepository.AddUserAsset(userId, assetsJSON);
@@ -29,26 +32,116 @@ namespace CryptoApi.Controllers
                 return BadRequest("Failed to add asset");
         }
 
-        [HttpGet("user/{userId}")]
-        public ActionResult<Asset> GetAssetsByUserId(int userId)
+        [HttpGet("user/assetstotal/{userId}")]
+        public ActionResult<Dictionary<string, decimal>> GetAssetsByUserId(int userId)
         {
             try
             {
-                var asset = _assetRepository.GetAssetsByUserId(userId);
+                var assets = _assetRepository.GetAssetsByUserId(userId);
 
-                if (asset == null)
+                if (assets == null || !assets.Any())
                 {
                     return NotFound();
                 }
 
-                return Ok(asset);
+                // Dictionary to store asset values
+                var assetsValues = new Dictionary<string, decimal>();
+
+                foreach (var asset in assets)
+                {
+                    // Deserialize the JSON string into a JObject
+                    var jsonObject = JsonConvert.DeserializeObject<JObject>(asset.assetsJSON);
+
+                    // Extract keys and values from the JObject
+                    foreach (var property in jsonObject.Properties())
+                    {
+                        // Convert value to decimal (assuming the values are numeric)
+                        if (decimal.TryParse(property.Value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
+                        {
+                            // Add or update the asset value in the dictionary
+                            if (assetsValues.ContainsKey(property.Name))
+                            {
+                                assetsValues[property.Name] += value;
+                            }
+                            else
+                            {
+                                assetsValues[property.Name] = value;
+                            }
+                        }
+                    }
+                }
+
+                return Ok(assetsValues);
             }
             catch (Exception ex)
             {
                 // Log the exception or return a generic error message
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while processing your request.");
-
             }
         }
+        
+    [HttpGet("user/assetstotalvalue/{userId}")]
+    public async Task<ActionResult<decimal>> GetTotalAssetsValueByUserId(int userId)
+    {
+        try
+        {
+            var assets = _assetRepository.GetAssetsByUserId(userId);
+
+            if (assets == null || !assets.Any())
+            {
+                return NotFound();
+            }
+
+            // Total value of all assets
+            decimal totalValue = 0m;
+
+            // HttpClient setup
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "5f3853b99amsh601f7aab225fb6ep1a2569jsndd2d15834371");
+                client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "real-time-quotes1.p.rapidapi.com");
+
+                foreach (var asset in assets)
+                {
+                    // Deserialize the JSON string into a JObject
+                    var jsonObject = JsonConvert.DeserializeObject<JObject>(asset.assetsJSON);
+
+                    foreach (var property in jsonObject.Properties())
+                    {
+                        // Convert value to decimal (assuming the values are numeric)
+                        if (decimal.TryParse(property.Value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out decimal quantity))
+                        {
+                            // API call to get the current value of the crypto
+                            var requestUri = $"https://real-time-quotes1.p.rapidapi.com/api/v1/realtime/crypto?source={property.Name}&target=USD";
+                            using (var response = await client.GetAsync(requestUri))
+                            {
+                                response.EnsureSuccessStatusCode();
+                                var body = await response.Content.ReadAsStringAsync();
+                                var cryptoData = JsonConvert.DeserializeObject<JArray>(body);
+
+                                // Extract the price of the crypto asset
+                                var price = cryptoData[0]["price"].Value<decimal>();
+
+                                // Calculate the total value by multiplying the quantity with the current value of the crypto
+                                totalValue += quantity * price;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Ok(totalValue);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Console.WriteLine($"An error occurred: {ex}");
+
+            // Return the exception message in the response
+            return StatusCode(StatusCodes.Status500InternalServerError, $"An unexpected error occurred: {ex.Message}");
+        }
+    }
+        
+        
     }
 }

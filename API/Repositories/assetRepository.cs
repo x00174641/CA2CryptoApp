@@ -48,5 +48,12 @@ namespace CryptoApi.Repositories
             // Retrieve all assets owned by the specified user
             return _dbContext.Assets.Where(asset => asset.userID == userId).ToList();
         }
+        
+        public List<Asset> GetTotalAssetsValueByUserId(int userId)
+        {
+            // Retrieve all assets owned by the specified user
+            return _dbContext.Assets.Where(asset => asset.userID == userId).ToList();
+        }
+        
     }
 }
