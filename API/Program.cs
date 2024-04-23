@@ -28,6 +28,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<AssetRepository>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<CryptoPortfolioRepository>();
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>(opt => 
     { 

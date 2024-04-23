@@ -1,12 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CryptoApi.Models
 {
     public class CryptoPortfolio 
-    {
+    {   
+        [Key]
         public int PortfolioID { get; set; }
-        public int UserID { get; set; } // Foreign key to relate portfolio to user
+        public string UserID { get; set; } // Should match the type in AspNetUsers table
         public string CryptoSymbol { get; set; } 
-        public int Amount { get; set; }
+        public decimal Amount { get; set; } // Should match the type in your database schema
     }
 }
