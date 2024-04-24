@@ -98,7 +98,7 @@ namespace CryptoApi.Controllers
             // HttpClient setup
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "cfa2caddadmshe13d9ac6b989363p10da2ejsn16d1e4a1d93f");
+                client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "9b5ad096c9msh8fcecb9bc33c82ep12f83ajsn9f72dd893a79");
                 client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "real-time-quotes1.p.rapidapi.com");
 
                 foreach (var asset in assets)
