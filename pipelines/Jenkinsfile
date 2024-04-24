@@ -13,7 +13,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'cd API && dotnet build MyJourneyToWork.sln --configuration Release'
+                sh 'cd API && dotnet build API.sln --configuration Release'
             }
         }
     }
