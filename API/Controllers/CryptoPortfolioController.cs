@@ -3,6 +3,7 @@ using CryptoApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -36,7 +37,7 @@ namespace CryptoApi.Controllers
 
                 if (portfolio == null || !portfolio.Any())
                 {
-                    return NotFound();
+                    return NotFound("User doesn't have any crypto holdings.");
                 }
 
                 return Ok(portfolio);
@@ -56,9 +57,9 @@ namespace CryptoApi.Controllers
             {
                 var portfolios = _cryptoPortfolioRepository.GetCryptoPortfoliosByUserId(userid);
 
-                if (portfolios == null || !portfolios.Any())
+                if (portfolios == null || !portfolios.Any() || portfolios.IsNullOrEmpty())
                 {
-                    return NotFound();
+                    return NotFound("User doesn't have any crypto holdings.");
                 }
 
                 decimal totalValue = 0m;
