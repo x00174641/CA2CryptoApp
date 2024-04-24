@@ -10,7 +10,8 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '~/components/primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
-import Screen from './(tabs)';
+import Screen from './(tabs)/LoginSignup';
+
 const LIGHT_THEME: Theme = {
   dark: false,
   colors: NAV_THEME.light,

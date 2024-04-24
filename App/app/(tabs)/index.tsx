@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Alert } from 'react-native';
+import { View, Alert, Image, ScrollView, RefreshControl } from 'react-native';
 import {
     Card,
     CardContent,
@@ -36,23 +36,68 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import { useNavigation } from 'expo-router';
+import useFetchUserId from '~/components/hooks/FetchUserId';
 
 export default function Screen() {
     const insets = useSafeAreaInsets();
-    const contentInsets = {
-        top: insets.top,
-        bottom: insets.bottom,
-        left: 12,
-        right: 12,
-    };
     const navigation = useNavigation();
-    const [selectedCrypto, setSelectedCrypto] = useState("BTC");
+    const [selectedCrypto, setSelectedCrypto] = useState('BTC');
     const [inputValue, setInputValue] = useState("");
     const { token } = useToken();
     const [userEmail, setUserEmail] = useState('');
     const [password, setPassword] = useState('');
     const [value, setValue] = useState('account');
     const [email, setEmail] = useState('');
+    const userId = useFetchUserId();
+    const [portfolioData, setPortfolioData] = useState([]);
+    const [totalAssets, setTotalAssets] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        if (userId) {
+            getTotalAssets();
+            getUserPortfolio();
+        }
+    }, [userId]);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        getTotalAssets();
+        getUserPortfolio();
+        setTimeout(() => setRefreshing(false), 1000);
+    }, [refreshing]);
+
+    const getTotalAssets = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/getTotalPortfolioValue/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTotalAssets(data);
+            }
+        } catch (error) {
+            console.error('Errors:', error);
+        }
+    };
+
+    const getUserPortfolio = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/getUserPortfolio/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setPortfolioData(data);
+            }
+        } catch (error) {
+            console.error('Errors:', error);
+        }
+    };
 
     const getUserInfo = async () => {
         try {
@@ -74,106 +119,107 @@ export default function Screen() {
     };
 
     useEffect(() => {
-        getUserInfo();
-    }, [token]);
+        const updateUserInfo = async () => {
+            if (userEmail) {
+                await getUserInfo();
+            }
+        };
 
+        updateUserInfo();
+
+        const interval = setInterval(updateUserInfo, 60000);
+
+        return () => clearInterval(interval);
+    }, [userEmail, token]);
+
+    const cryptoIcons = {
+        BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=031',
+        ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=031',
+        USDT: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=031',
+        BNB: 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=031',
+        SOL: 'https://cryptologos.cc/logos/solana-sol-logo.png?v=031',
+        USDC: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=031',
+        XRP: 'https://cryptologos.cc/logos/xrp-xrp-logo.png?v=031',
+        DOGE: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png?v=031',
+        TON: 'https://cryptologos.cc/logos/toncoin-ton-logo.png?v=031',
+        ADA: 'https://cryptologos.cc/logos/cardano-ada-logo.png?v=031',
+    };
     const handleAddCrypto = async () => {
         try {
-            const response = await fetch('http://10.0.2.2:5281/add-crypto', {
+            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/addCryptoToPortfolio/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    crypto: selectedCrypto,
+                    id: '0',
+                    cryptoSymbol: selectedCrypto,
                     amount: inputValue,
                 }),
             });
-
+            console.log(response)
             if (response.ok) {
+                getUserPortfolio();
+                getTotalAssets();
+
                 Alert.alert('Success', 'Crypto added to your portfolio.');
             } else {
-                // Handle error
-                Alert.alert('Error', 'Failed to add crypto to your portfolio.');
+                Alert.alert('Error', 'Failed to add crypto to your portfolios.');
             }
         } catch (error) {
             console.error('Error:', error);
         }
     };
-
-    const handleLogin = async () => {
-        try {
-            const response = await fetch('http://10.0.2.2:5281/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    "twoFactorCode": "string",
-                    "twoFactorRecoveryCode": "string"
-                }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                await AsyncStorage.setItem('token', data.accessToken);
-                const token = await AsyncStorage.getItem('token');
-                console.log(token);
-
-                await getUserInfo();
-
-                setUserEmail(email);
-
-                Alert.alert('Success', 'You are logged in.', [
-                    {
-                        text: 'OK', onPress: () => {
-                            navigation.navigate('index');
-                        }
-                    }
-                ]);
-            } else {
-                Alert.alert('Error', 'Invalid email or password');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
     return (
-        <View style={{ flex: 1, gap: 1, padding: 3 }}>
-            {userEmail ? (
-                <View>
-                    <Card className='mt-2 rounded-lg'>
-                        <CardHeader>
-                            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                <CardTitle className='font-semibold mt-4'>$ 55,460.09</CardTitle>
-                            </View>
-                            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                <CardTitle className='text-base text-green-500 font-semibold mt-4'>+ 379.81 %</CardTitle>
-                            </View>
-                            <CardContent>
-                                <View className='flex-row justify-around gap-3 mt-8'>
-                                    <View className='items-center'>
-                                        <Text className='text-xl font-semibold'>$11,558.76</Text>
-                                        <Text className='text-sm text-muted-foreground'>Cost</Text>
-                                    </View>
-                                    <View className='items-center'>
-                                        <Text className='text-xl font-semibold'>$43,901.33</Text>
-                                        <Text className='text-sm text-muted-foreground'>Profit</Text>
-                                    </View>
-                                </View>
-                            </CardContent>
-                        </CardHeader>
-                    </Card>
-                    <Card className='mt-6 rounded-lg'>
+        <ScrollView
+            style={{ flex: 1, gap: 1, padding: 3 }}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }
+        >
+
+            <View>
+                <Card className='mt-2 rounded-lg'>
+                    <CardHeader>
+                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                            <CardTitle className='font-semibold mt-4'>$ {totalAssets ? totalAssets : '0.00'}</CardTitle>
+                        </View>
+                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                            <CardTitle className='text-base text-green-500 font-semibold mt-4'>+ 379.81 %</CardTitle>
+                        </View>
                         <CardContent>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} className='mt-6 rounded-lg'>
-                                <View>
-                                    <CardTitle>1.012523 Bitcoin</CardTitle>
-                                    <CardDescription className='text-left text-muted-foreground'>$42,411.56 ($40,000.13)</CardDescription>
+                            <View className='flex-row justify-around gap-3 mt-8'>
+                                <View className='items-center'>
+                                    <Text className='text-xl font-semibold'>$11,558.76</Text>
+                                    <Text className='text-sm text-muted-foreground'>Cost</Text>
+                                </View>
+                                <View className='items-center'>
+                                    <Text className='text-xl font-semibold'>$43,901.33</Text>
+                                    <Text className='text-sm text-muted-foreground'>Profit</Text>
+                                </View>
+                            </View>
+                        </CardContent>
+                    </CardHeader>
+                </Card>
+                {portfolioData.map((item, index) => (
+                    <Card className='mt-6 rounded-lg' key={index}>
+                        <CardContent>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }} className='mt-6 rounded-lg'>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image
+                                        source={{
+                                            uri: cryptoIcons[item.cryptoSymbol],
+                                        }}
+                                        style={{ width: 50, height: 50, marginRight: 10 }}
+                                    />
+                                    <View>
+                                        <CardTitle>{item.amount} {item.cryptoSymbol}</CardTitle>
+                                        <CardDescription className='text-left text-muted-foreground'>$42,411.56 ($40,000.13)</CardDescription>
+                                    </View>
                                 </View>
                                 <View style={{ alignItems: 'flex-end' }}>
                                     <CardTitle className='text-right text-green-500'>+ 883.70%</CardTitle>
@@ -182,146 +228,57 @@ export default function Screen() {
                             </View>
                         </CardContent>
                     </Card>
-                    <Card className='mt-6 rounded-lg'>
-                        <CardContent>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} className='mt-6'>
-                                <View>
-                                    <CardTitle>2.745 Ethereum</CardTitle>
-                                    <CardDescription className='text-muted-foreground'>$7,321 ($2,421.13)</CardDescription>
-                                </View>
-                                <View style={{ alignItems: 'flex-end' }}>
-                                    <CardTitle className='text-right text-red-500'>+ 263.70%</CardTitle>
-                                    <CardDescription>ROI</CardDescription>
-                                </View>
-                            </View>
-                        </CardContent>
-                    </Card>
+                ))}
 
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <AntDesign name="pluscircle" size={48} color="grey" style={{ textAlign: 'center', marginTop: 24 }} />
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle style={{ marginBottom: 6 }}>Add a Crypto to your Portfolio</AlertDialogTitle>
-                                <Input
-                                    placeholder='Amount'
-                                    value={inputValue}
-                                    onChangeText={setInputValue}
-                                />
-                                <Text>Choose a Crypto to add to your assets</Text>
-                                <Select
-                                    defaultValue={{ value: 'btc', label: 'Bitcoin' }}
-                                    onSelect={item => setSelectedCrypto(item.value)}
-                                >
-                                    <SelectTrigger style={{ width: 250 }}>
-                                        <SelectValue
-                                            style={{ color: 'gray', fontSize: 14 }}
-                                            placeholder='Select a crypto'
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent insets={contentInsets} style={{ width: 250 }}>
-                                        <SelectGroup>
-                                            <SelectItem label='Bitcoin' value='BTC'>
-                                                Bitcoin
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <AntDesign name="pluscircle" size={48} color="grey" style={{ textAlign: 'center', marginTop: 24 }} />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle style={{ marginBottom: 6 }}>Add a Crypto to your Portfolio</AlertDialogTitle>
+                            <Input
+                                placeholder='Amount'
+                                value={inputValue}
+                                onChangeText={setInputValue}
+                            />
+                            <Text>Choose a Crypto to add to your assets</Text>
+                            <Select defaultValue={{ value: selectedCrypto, label: 'Bitcoin' }} onValueChange={(value) => {
+                                setSelectedCrypto(value?.value);
+                            }}>
+                                <SelectTrigger style={{ width: 250 }}>
+                                    <SelectValue
+                                        style={{ color: 'gray', fontSize: 14 }}
+                                        placeholder='Select a crypto'
+                                    />
+                                </SelectTrigger>
+                                <SelectContent  style={{ width: 250 }}>
+                                    <SelectGroup>
+                                        {Object.keys(cryptoIcons).map((key) => (
+                                            <SelectItem key={key} label={key} value={key}>
+                                                <img
+                                                    src={cryptoIcons[key]}
+                                                    alt={key}
+                                                />
+                                                {key}
                                             </SelectItem>
-                                            <SelectItem label='Ethereum' value='ETH'>
-                                                Ethereum
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>
-                                    <Text>Cancel</Text>
-                                </AlertDialogCancel>
-                                <AlertDialogAction onPress={handleAddCrypto}>
-                                    <Text>Add</Text>
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </View>
-            ) : (
-                <View>
-                    <Tabs
-                        value={value}
-                        onValueChange={setValue}
-                        className='w-full max-w-[400px] mx-auto flex-col gap-1.5'
-                    >
-                        <TabsList className='flex-row w-full'>
-                            <TabsTrigger value='account' className='flex-1'>
-                                <Text>Account</Text>
-                            </TabsTrigger>
-                            <TabsTrigger value='password' className='flex-1'>
-                                <Text>Password</Text>
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value='account'>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Login</CardTitle>
-                                    <CardDescription>
-                                        Login to your portfolio
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className='gap-4 native:gap-2'>
-                                    <View className='gap-1'>
-                                        <Label nativeID='Username'>Email</Label>
-                                        <Input
-                                            aria-aria-labelledby='Username'
-                                            placeholder='Username'
-                                            value={email}
-                                            onChangeText={(text) => setEmail(text)}
-                                        />
-                                    </View>
-                                    <View className='gap-1'>
-                                        <Label nativeID='Password'>Password</Label>
-                                        <Input
-                                            id='password'
-                                            placeholder='Password'
-                                            secureTextEntry
-                                            value={password}
-                                            onChangeText={(text) => setPassword(text)}
-                                        />
-                                    </View>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button onPress={handleLogin}>
-                                        <Text>Login</Text>
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-                        <TabsContent value='password'>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Password</CardTitle>
-                                    <CardDescription>
-                                        Change your password here. After saving, you'll be logged out.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className='gap-4 native:gap-2'>
-                                    <View className='gap-1'>
-                                        <Label nativeID='current'>Current password</Label>
-                                        <Input placeholder='********' aria-labelledby='current' secureTextEntry />
-                                    </View>
-                                    <View className='gap-1'>
-                                        <Label nativeID='new'>New password</Label>
-                                        <Input placeholder='********' aria-labelledby='new' secureTextEntry />
-                                    </View>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button>
-                                        <Text>Save password</Text>
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
-                </View>
-            )}
-        </View>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>
+                                <Text>Cancel</Text>
+                            </AlertDialogCancel>
+                            <AlertDialogAction onPress={handleAddCrypto}>
+                                <Text>Add</Text>
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </View>
+        </ScrollView>
     );
 }
