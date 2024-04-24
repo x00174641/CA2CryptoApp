@@ -25,5 +25,9 @@ namespace CryptoApi.Repositories
         {
             return await _dbContext.SaveChangesAsync();
         }
+        public IEnumerable<CryptoTransaction> GetTransactionsByUserId(string userId)
+        {
+            return _dbContext.CryptoTransactions.Where(t => t.UserId == userId).ToList();
+        }
     }
 }
