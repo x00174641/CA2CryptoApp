@@ -56,7 +56,6 @@ export default function Screen() {
     const [cryptoPrices, setCryptoPrices] = useState({});
     const [transactionHistory, setTransactionHistory] = useState([]);
     const [loading, setLoading] = useState(false);
-
     useEffect(() => {
         if (userId) {
             setLoading(true);
@@ -307,9 +306,9 @@ export default function Screen() {
                 </Card>
               
                 {cryptoPrices && portfolioData.map((item, index) => (
-                    <Card className='mt-6 rounded-lg' key={index}>
+                    <Card className='mt-6 rounded-lg' style={{marginTop: 15, padding: 10}} key={index}>
                         <CardContent>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }} className='mt-6 rounded-lg'>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 15 }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <Image
                                         source={{
@@ -326,7 +325,7 @@ export default function Screen() {
                                     </View>
                                 </View>
                                 <View style={{ alignItems: 'flex-end' }}>
-                                    <CardTitle className={`text-right ${item.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    <CardTitle  style={{color: item.roi < 0 ? 'red' : 'green'}}>
                                         {item.roi}%
                                     </CardTitle>
                                     <CardDescription>ROI</CardDescription>

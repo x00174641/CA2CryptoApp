@@ -1,3 +1,12 @@
 {
-    "profit": "Profit"
+    "total_assets": "Total Assets",
+    "pnl_percentage": "PNL Percentage",
+    "cost": "Cost",
+    "pnl": "PNL",
+    "add_crypto": "Add a Crypto to your Portfolio",
+    "choose_crypto": "Choose a Crypto to add to your assets",
+    "select_crypto": "Select a crypto",
+    "enter_amount": "Enter how much",
+    "cancel": "Cancel",
+    "add": "Add"
 }
