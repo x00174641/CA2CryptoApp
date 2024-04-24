@@ -281,39 +281,31 @@ export default function Screen() {
         >
 
             <View>
-                <Card className='mt-2 rounded-lg'>
-                    <CardHeader>
-                        {loading ? (
-                            <ActivityIndicator size="large" color="#0000ff" />
-                        ) : (
-                            <>
-                                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <CardTitle className='font-semibold mt-4'>$ {totalAssets ? totalAssets.toLocaleString() : '0.00'}</CardTitle>
-                                </View>
-                                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <CardTitle className={`text-base font-semibold mt-4 `} style={{ color: (profitLossPercentage) < 0 ? 'red' : 'green' }}>
-                                        {profitLossPercentage} %
-                                    </CardTitle>                                
-                                    </View>
-                                <CardContent>
-                                    <View className='flex-row justify-around gap-3 mt-8'>
-                                        <View className='items-center'>
-                                            <Text className='text-xl font-semibold'>${totalCost.toLocaleString()}</Text>
-                                            <Text className='text-sm text-muted-foreground'>Cost</Text>
-                                        </View>
-                                        <View className='items-center'>
-                                            <Text className='text-xl font-semibold' style={{ color: (totalAssets - totalCost) < 0 ? 'red' : 'green' }}>
-                                                {(totalAssets - totalCost).toFixed(2)}
-                                            </Text>
-
-                                            <Text className='text-sm text-muted-foreground'>PNL</Text>
-                                        </View>
-                                    </View>
-                                </CardContent>
-                            </>
-                        )}
+            <Card className='w-full max-w-sm p-6 rounded-2xl'>
+                    <CardHeader className='items-center'>
+                        <View className='p-3' />
+                        <CardTitle className='pb-2 text-center'>$ {totalAssets ? totalAssets.toLocaleString() : '0.00'}</CardTitle>
+                        <View className='flex-row'>
+                            <CardDescription className='text-base font-semibold' style={{ color: (profitLossPercentage) < 0 ? 'red' : 'green' }}>{profitLossPercentage} %</CardDescription>
+                        </View>
                     </CardHeader>
+                    <CardContent>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16 }}>
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 20, fontWeight: '600' }}>${totalCost.toLocaleString()}</Text>
+                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>Cost</Text>
+                        </View>
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 20, fontWeight: '600', color: totalAssets - totalCost < 0 ? 'red' : 'green' }}>
+                                {(totalAssets - totalCost).toFixed(2)}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>PNL</Text>
+                        </View>
+                    </View>
+                    </CardContent>
+
                 </Card>
+              
                 {cryptoPrices && portfolioData.map((item, index) => (
                     <Card className='mt-6 rounded-lg' key={index}>
                         <CardContent>

@@ -69,7 +69,7 @@ namespace CryptoApi.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "9b5ad096c9msh8fcecb9bc33c82ep12f83ajsn9f72dd893a79");
+                    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "081b98ad18msh1d7a4100fc215a2p1a2193jsn9575485f46a9");
                     client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "real-time-quotes1.p.rapidapi.com");
 
                     foreach (var portfolio in portfolios)
@@ -149,7 +149,7 @@ namespace CryptoApi.Controllers
     {
         using (var client = new HttpClient())
         {
-            client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "9b5ad096c9msh8fcecb9bc33c82ep12f83ajsn9f72dd893a79");
+            client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "081b98ad18msh1d7a4100fc215a2p1a2193jsn9575485f46a9");
             client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "real-time-quotes1.p.rapidapi.com");
 
             var requestUri = $"https://real-time-quotes1.p.rapidapi.com/api/v1/realtime/crypto?source={cryptoSymbol}&target=USD";
