@@ -5050,19 +5050,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\vita\\.nuget\\packages\\": {}
+    "/Users/maxw/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\git\\CA3CryptoApp\\API\\API.csproj",
+      "projectUniqueName": "/Users/maxw/git/CA3CryptoApp/API/API.csproj",
       "projectName": "API",
-      "projectPath": "C:\\git\\CA3CryptoApp\\API\\API.csproj",
-      "packagesPath": "C:\\Users\\vita\\.nuget\\packages\\",
-      "outputPath": "C:\\git\\CA3CryptoApp\\API\\obj\\",
+      "projectPath": "/Users/maxw/git/CA3CryptoApp/API/API.csproj",
+      "packagesPath": "/Users/maxw/.nuget/packages/",
+      "outputPath": "/Users/maxw/git/CA3CryptoApp/API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\vita\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/maxw/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -5140,7 +5140,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
