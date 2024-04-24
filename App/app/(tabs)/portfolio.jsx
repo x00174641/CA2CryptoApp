@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Alert, Image, ScrollView, RefreshControl } from 'react-native';
+import { View, Alert, Image, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import {
     Card,
     CardContent,
@@ -51,25 +51,46 @@ export default function Screen() {
     const userId = useFetchUserId();
     const [portfolioData, setPortfolioData] = useState([]);
     const [totalAssets, setTotalAssets] = useState(null);
+    const [totalCost, setTotalCost] = useState(0); // Total cost state
     const [refreshing, setRefreshing] = useState(false);
+    const [cryptoPrices, setCryptoPrices] = useState({});
+    const [transactionHistory, setTransactionHistory] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (userId) {
+            setLoading(true);
             getTotalAssets();
             getUserPortfolio();
+            getTransactionHistory();
         }
     }, [userId]);
+
+    useEffect(() => {
+        if (Object.keys(cryptoPrices).length > 0) {
+            setPortfolioDataWithPrices();
+        }
+    }, [cryptoPrices]);
+
+    const setPortfolioDataWithPrices = () => {
+        setPortfolioData(portfolioData.map(item => {
+            const totalValue = cryptoPrices[item.cryptoSymbol] ? (cryptoPrices[item.cryptoSymbol] * item.amount).toFixed(2) : '0.00';
+            const roi = calculateROI(item.cryptoSymbol, totalValue);
+            return { ...item, totalValue, roi };
+        }));
+    };
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         getTotalAssets();
         getUserPortfolio();
+        getTransactionHistory();
         setTimeout(() => setRefreshing(false), 1000);
     }, [refreshing]);
 
     const getTotalAssets = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/getTotalPortfolioValue/${userId}`, {
+            const response = await fetch(`http://159.65.21.195/api/CryptoPortfolio/getTotalPortfolioValue/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -80,12 +101,14 @@ export default function Screen() {
             }
         } catch (error) {
             console.error('Errors:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const getUserPortfolio = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/getUserPortfolio/${userId}`, {
+            const response = await fetch(`http://159.65.21.195/api/CryptoPortfolio/getUserPortfolio/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -93,6 +116,29 @@ export default function Screen() {
             if (response.ok) {
                 const data = await response.json();
                 setPortfolioData(data);
+                if (data.length > 0) { // Check if portfolioData is not empty
+                    fetchAllPrices(); // Fetch crypto prices
+                }
+            }
+        } catch (error) {
+            console.error('Errors:', error);
+        }
+    };
+
+    const getTransactionHistory = async () => { // Function to fetch transaction history
+        try {
+            const response = await fetch(`http://159.65.21.195/api/CryptoTransaction/getTransactionsByUserId/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTransactionHistory(data);
+                const total = data.reduce((acc, transaction) => {
+                    return acc + (transaction.amount * transaction.price);
+                }, 0);
+                setTotalCost(total);
             }
         } catch (error) {
             console.error('Errors:', error);
@@ -101,7 +147,7 @@ export default function Screen() {
 
     const getUserInfo = async () => {
         try {
-            const response = await fetch('http://10.0.2.2:5281/manage/info', {
+            const response = await fetch('http://159.65.21.195/manage/info', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -144,25 +190,27 @@ export default function Screen() {
         TON: 'https://cryptologos.cc/logos/toncoin-ton-logo.png?v=031',
         ADA: 'https://cryptologos.cc/logos/cardano-ada-logo.png?v=031',
     };
+
     const handleAddCrypto = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:5281/api/CryptoPortfolio/addCryptoToPortfolio/${userId}`, {
+            const response = await fetch(`http://159.65.21.195/api/CryptoPortfolio/addCryptoToPortfolio/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
+                    portfolioID: 0,
                     id: '0',
                     cryptoSymbol: selectedCrypto,
                     amount: inputValue,
                 }),
             });
-            console.log(response)
+            console.log(response.body)
             if (response.ok) {
                 getUserPortfolio();
                 getTotalAssets();
-
+                getTransactionHistory();
                 Alert.alert('Success', 'Crypto added to your portfolio.');
             } else {
                 Alert.alert('Error', 'Failed to add crypto to your portfolios.');
@@ -171,6 +219,56 @@ export default function Screen() {
             console.error('Error:', error);
         }
     };
+
+    const fetchAllPrices = async () => {
+        try {
+            await Promise.all(
+                portfolioData.map(item => fetchPrice(item.cryptoSymbol))
+            );
+        } catch (error) {
+            console.error('Error fetching crypto prices:', error);
+        }
+    };
+
+    const fetchPrice = async (cryptoSymbol) => {
+        try {
+            const response = await fetch(`http://159.65.21.195/api/CryptoTransaction/getCryptoPrice/${cryptoSymbol}`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Crypto Prices:", data); // Add this line
+                setCryptoPrices(prevPrices => ({ ...prevPrices, [cryptoSymbol]: data }));
+            }
+        } catch (error) {
+            console.error('Error fetching crypto prices:', error);
+        }
+    };
+
+    const getEntryPrice = (cryptoSymbol) => {
+        const transactions = transactionHistory.filter(transaction => transaction.cryptoSymbol === cryptoSymbol);
+        if (transactions.length > 0) {
+            const totalAmount = transactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+            const totalPrice = transactions.reduce((acc, transaction) => acc + (transaction.amount * transaction.price), 0);
+            return totalPrice / totalAmount;
+        }
+        return 0;
+    };
+
+    const calculateROI = (cryptoSymbol, totalValue) => {
+        const cryptoPrice = transactionHistory.find(transaction => transaction.cryptoSymbol === cryptoSymbol)?.price;
+        if (cryptoPrice) {
+            const entryPrice = cryptoPrice * portfolioData.find(item => item.cryptoSymbol === cryptoSymbol)?.amount;
+            if (entryPrice !== undefined && entryPrice !== null && entryPrice !== 0) {
+                const profitLoss = ((totalValue - entryPrice) / entryPrice) * 100;
+                return profitLoss.toFixed(2);
+            }
+        }
+        return 0;
+    };
+
+    const profitLossPercentage = totalAssets !== null && totalCost !== null ?
+    (((totalAssets - totalCost) / totalCost) * 100).toFixed(2) :
+    0;
+
     return (
         <ScrollView
             style={{ flex: 1, gap: 1, padding: 3 }}
@@ -185,27 +283,38 @@ export default function Screen() {
             <View>
                 <Card className='mt-2 rounded-lg'>
                     <CardHeader>
-                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <CardTitle className='font-semibold mt-4'>$ {totalAssets ? totalAssets : '0.00'}</CardTitle>
-                        </View>
-                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <CardTitle className='text-base text-green-500 font-semibold mt-4'>+ 379.81 %</CardTitle>
-                        </View>
-                        <CardContent>
-                            <View className='flex-row justify-around gap-3 mt-8'>
-                                <View className='items-center'>
-                                    <Text className='text-xl font-semibold'>$11,558.76</Text>
-                                    <Text className='text-sm text-muted-foreground'>Cost</Text>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            <>
+                                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                    <CardTitle className='font-semibold mt-4'>$ {totalAssets ? totalAssets.toLocaleString() : '0.00'}</CardTitle>
                                 </View>
-                                <View className='items-center'>
-                                    <Text className='text-xl font-semibold'>$43,901.33</Text>
-                                    <Text className='text-sm text-muted-foreground'>Profit</Text>
-                                </View>
-                            </View>
-                        </CardContent>
+                                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                    <CardTitle className={`text-base font-semibold mt-4 `} style={{ color: (profitLossPercentage) < 0 ? 'red' : 'green' }}>
+                                        {profitLossPercentage} %
+                                    </CardTitle>                                
+                                    </View>
+                                <CardContent>
+                                    <View className='flex-row justify-around gap-3 mt-8'>
+                                        <View className='items-center'>
+                                            <Text className='text-xl font-semibold'>${totalCost.toLocaleString()}</Text>
+                                            <Text className='text-sm text-muted-foreground'>Cost</Text>
+                                        </View>
+                                        <View className='items-center'>
+                                            <Text className='text-xl font-semibold' style={{ color: (totalAssets - totalCost) < 0 ? 'red' : 'green' }}>
+                                                {(totalAssets - totalCost).toFixed(2)}
+                                            </Text>
+
+                                            <Text className='text-sm text-muted-foreground'>PNL</Text>
+                                        </View>
+                                    </View>
+                                </CardContent>
+                            </>
+                        )}
                     </CardHeader>
                 </Card>
-                {portfolioData.map((item, index) => (
+                {cryptoPrices && portfolioData.map((item, index) => (
                     <Card className='mt-6 rounded-lg' key={index}>
                         <CardContent>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }} className='mt-6 rounded-lg'>
@@ -218,11 +327,16 @@ export default function Screen() {
                                     />
                                     <View>
                                         <CardTitle>{item.amount} {item.cryptoSymbol}</CardTitle>
-                                        <CardDescription className='text-left text-muted-foreground'>$42,411.56 ($40,000.13)</CardDescription>
+                                        <CardDescription className='text-left text-muted-foreground'>
+                                            {`$${item.totalValue}`}
+                                        </CardDescription>
+
                                     </View>
                                 </View>
                                 <View style={{ alignItems: 'flex-end' }}>
-                                    <CardTitle className='text-right text-green-500'>+ 883.70%</CardTitle>
+                                    <CardTitle className={`text-right ${item.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                        {item.roi}%
+                                    </CardTitle>
                                     <CardDescription>ROI</CardDescription>
                                 </View>
                             </View>
@@ -230,18 +344,16 @@ export default function Screen() {
                     </Card>
                 ))}
 
+
+
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
+
                         <AntDesign name="pluscircle" size={48} color="grey" style={{ textAlign: 'center', marginTop: 24 }} />
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle style={{ marginBottom: 6 }}>Add a Crypto to your Portfolio</AlertDialogTitle>
-                            <Input
-                                placeholder='Amount'
-                                value={inputValue}
-                                onChangeText={setInputValue}
-                            />
+                            <AlertDialogTitle style={{ marginBottom: 12 }}>Add a Crypto to your Portfolio</AlertDialogTitle>
                             <Text>Choose a Crypto to add to your assets</Text>
                             <Select defaultValue={{ value: selectedCrypto, label: 'Bitcoin' }} onValueChange={(value) => {
                                 setSelectedCrypto(value?.value);
@@ -252,7 +364,7 @@ export default function Screen() {
                                         placeholder='Select a crypto'
                                     />
                                 </SelectTrigger>
-                                <SelectContent  style={{ width: 250 }}>
+                                <SelectContent style={{ width: 250 }}>
                                     <SelectGroup>
                                         {Object.keys(cryptoIcons).map((key) => (
                                             <SelectItem key={key} label={key} value={key}>
@@ -266,7 +378,13 @@ export default function Screen() {
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-
+                            <Text>Enter how much</Text>
+                            <Input
+                                placeholder='Amount'
+                                value={inputValue}
+                                onChangeText={setInputValue}
+                            />
+                        
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>
