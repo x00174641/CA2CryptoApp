@@ -14,7 +14,7 @@ namespace CryptoApi.Controllers
     public class CryptoPortfolioController : ControllerBase
     {
         private readonly CryptoPortfolioRepository _cryptoPortfolioRepository;
-
+        
         public CryptoPortfolioController(CryptoPortfolioRepository cryptoPortfolioRepository)
         {
             _cryptoPortfolioRepository = cryptoPortfolioRepository;
@@ -22,13 +22,6 @@ namespace CryptoApi.Controllers
 
         [HttpGet("getAllPortfolios")]
         public ActionResult<IEnumerable<CryptoPortfolio>> GetPortfolios()
-        {
-            var portfolios = _cryptoPortfolioRepository.GetAllCryptoPortfolios();
-            return Ok(portfolios);
-        }
-        
-        [HttpGet("getPortfolio/{userid}")]
-        public ActionResult<IEnumerable<CryptoPortfolio>> GetUserPortfolios()
         {
             var portfolios = _cryptoPortfolioRepository.GetAllCryptoPortfolios();
             return Ok(portfolios);
@@ -105,5 +98,51 @@ namespace CryptoApi.Controllers
                 return StatusCode(500, "An error occurred while calculating the total portfolio value.");
             }
         }
+        
+        [HttpPost("addCryptoToPortfolio/{userId}")]
+        public async Task<ActionResult<CryptoPortfolio>> AddCryptoToPortfolio(string userId, CryptoPortfolio cryptoPortfolio)
+        {
+            try
+            {
+                // Validate the incoming data
+                if (cryptoPortfolio == null)
+                {
+                    return BadRequest("Crypto portfolio data is null.");
+                }
+
+                // Set the user ID
+                cryptoPortfolio.Id = userId;
+
+                // Check if the user already has holdings for this cryptocurrency
+                var existingPortfolio = _cryptoPortfolioRepository.GetCryptoPortfolioByUserIdAndSymbol(userId, cryptoPortfolio.CryptoSymbol);
+
+                if (existingPortfolio != null)
+                {
+                    // User already has holdings for this cryptocurrency, update the amount
+                    existingPortfolio.Amount += cryptoPortfolio.Amount;
+                    _cryptoPortfolioRepository.UpdateCryptoPortfolio(existingPortfolio);
+                }
+                else
+                {
+                    // Add the new crypto portfolio to the repository
+                    _cryptoPortfolioRepository.AddCryptoPortfolio(cryptoPortfolio);
+                }
+
+                await _cryptoPortfolioRepository.SaveChangesAsync();
+
+                // Return the updated or added crypto portfolio
+                return CreatedAtAction(nameof(GetCryptoPortfoliosByUserId), new { userId = cryptoPortfolio.Id }, cryptoPortfolio);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // Return an appropriate error message
+                return StatusCode(500, "An error occurred while adding crypto to the portfolio.");
+            }
+        }
+
+
+        
+        
     }
 }
