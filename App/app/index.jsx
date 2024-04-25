@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Alert, Image } from 'react-native';
+import { View, Alert, Image, FlatList, TouchableOpacity , StyleSheet } from 'react-native';
 import {
     Card,
     CardContent,
@@ -38,6 +38,9 @@ import { Label } from '~/components/ui/label';
 import { useNavigation } from 'expo-router';
 import useFetchUserId from '~/components/hooks/FetchUserId';
 import { router } from 'expo-router';
+import i18next, {languageResources} from './services/i18next';
+import {useTranslation} from 'react-i18next';
+import languagesList from './services/languageList.json';
 
 export default function Screen() {
     const insets = useSafeAreaInsets();
@@ -58,6 +61,7 @@ export default function Screen() {
     const userId = useFetchUserId();
     const [portfolioData, setPortfolioData] = useState([]);
     const [totalAssets, setTotalAssets] = useState(null);
+    const [visible, setVisible] = useState(false);
 
     const getUserInfo = async () => {
         try {
@@ -117,14 +121,14 @@ export default function Screen() {
     
                 setUserEmail(email);
                 router.replace('/(tabs)/portfolio');
-                Alert.alert('Success', 'You are logged in.', [
+                Alert.alert(t('success'), t('logged_in'), [
                     {
                         text: 'OK', onPress: () => {
                         }
                     }
                 ]);
             } else {
-                Alert.alert('Error', 'Invalid email or passwords');
+                Alert.alert(t('error'), t('invalid_credentials'));
             }
         } catch (error) {
             console.error('Error:', error);
@@ -150,23 +154,39 @@ export default function Screen() {
             console.log("Response status:", response.status);
     
             if (response.status === 200) {
-                Alert.alert('Success', 'You are registered.', [
+                Alert.alert(t('success'), t('registration_successful'), [
                     {
                         text: 'OK', onPress: () => {
                         }
                     }
                 ]);
             } else {
-                Alert.alert('Error', 'Registration failed.');
+                Alert.alert(t('error'), t('registration_failed'));
             }
         } catch (error) {
             console.error('Error:', error);
         }
     };
     
-    
+    const {t} = useTranslation();
+    const changeLng = lng => {
+        i18next.changeLanguage(lng);
+        setVisible(false);
+      };
     return (
         <View style={{ flex: 1, gap: 1, padding: 3 }}>
+            <FlatList
+            data={Object.keys(languageResources)}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={styles.languageButton}
+                onPress={() => changeLng(item)}>
+                <Text style={styles.lngName}>
+                  {languagesList[item].nativeName}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
             <View>
                 <Tabs
                     value={value}
@@ -175,35 +195,35 @@ export default function Screen() {
                 >
                     <TabsList className='flex-row w-full'>
                         <TabsTrigger value='account' className='flex-1'>
-                            <Text>Login</Text>
+                            <Text>{t('login')}</Text>
                         </TabsTrigger>
                         <TabsTrigger value='signup' className='flex-1'>
-                            <Text>Signup</Text>
+                            <Text>{t('signup_title')}</Text>
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value='account'>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Login</CardTitle>
+                                <CardTitle>{t('login')}</CardTitle>
                                 <CardDescription>
-                                    Login to your CryptoTrackr
+                                    {t('login_description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className='gap-4 native:gap-2'>
                                 <View className='gap-1'>
-                                    <Label nativeID='Username'>Email</Label>
+                                    <Label nativeID='Username'>{t('email')}</Label>
                                     <Input
                                         aria-aria-labelledby='Username'
-                                        placeholder='Username'
+                                        placeholder={t('email')}
                                         value={email}
                                         onChangeText={(text) => setEmail(text)}
                                     />
                                 </View>
                                 <View className='gap-1'>
-                                    <Label nativeID='Password'>Password</Label>
+                                    <Label nativeID='Password'>{t('password')}</Label>
                                     <Input
                                         id='password'
-                                        placeholder='Password'
+                                        placeholder={t('password')}
                                         secureTextEntry
                                         value={password}
                                         onChangeText={(text) => setPassword(text)}
@@ -212,7 +232,7 @@ export default function Screen() {
                             </CardContent>
                             <CardFooter>
                                 <Button onPress={handleLogin}>
-                                    <Text>Login</Text>
+                                    <Text>{t('login')}</Text>
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -220,26 +240,26 @@ export default function Screen() {
                     <TabsContent value='signup'>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Sign up to CryptoTrackr</CardTitle>
+                                <CardTitle>{t('signup_title')}</CardTitle>
                                 <CardDescription>
-                                    We dont save your password
+                                    {t('signup_description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className='gap-4 native:gap-2'>
                                 <View className='gap-1'>
-                                    <Label nativeID='Email'>Email</Label>
+                                    <Label nativeID='Email'>{t('email')}</Label>
                                     <Input
                                         aria-aria-labelledby='email'
-                                        placeholder='Email'
+                                        placeholder={t('email')}
                                         value={email}
                                         onChangeText={(text) => setEmail(text)}
                                     />
                                 </View>
                                 <View className='gap-1'>
-                                    <Label nativeID='Password'>Password</Label>
+                                    <Label nativeID='Password'>{t('password')}</Label>
                                     <Input
                                         id='password'
-                                        placeholder='Password'
+                                        placeholder={t('password')}
                                         secureTextEntry
                                         value={password}
                                         onChangeText={(text) => setPassword(text)}
@@ -247,12 +267,9 @@ export default function Screen() {
                                 </View>
                             </CardContent>
                             <CardFooter>
-                            <TabsTrigger value='account'>
                                 <Button onPress={handleRegister}>
-                                    <Text>Register</Text>
+                                    <Text>{t('register')}</Text>
                                 </Button>
-                        </TabsTrigger>
-                               
                             </CardFooter>
                         </Card>
                     </TabsContent>
@@ -261,3 +278,41 @@ export default function Screen() {
         </View>
     );
 }
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#191266',
+    },
+    button: {
+      backgroundColor: '#6258e8',
+      padding: 10,
+      borderRadius: 3,
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+    },
+    text: {
+      marginBottom: 100,
+      fontSize: 18,
+      color: 'white',
+    },
+    languagesList: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: 10,
+      backgroundColor: '#6258e8',
+    },
+  
+    languageButton: {
+      padding: 10,
+      borderBottomColor: '#dddddd',
+      borderBottomWidth: 1,
+    },
+    lngName: {
+      fontSize: 16,
+      color: 'white',
+    },
+  });

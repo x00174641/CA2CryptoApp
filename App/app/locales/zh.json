@@ -8,5 +8,16 @@
     "select_crypto": "选择加密货币",
     "enter_amount": "输入数量",
     "cancel": "取消",
-    "add": "添加"
+    "add": "添加",
+    "login": "登录",
+    "login_description": "登录到您的 CryptoTrackr 帐户",
+    "signup_title": "注册到",
+    "signup_description": "我们不会保存您的密码",
+    "email": "邮箱",
+    "password": "密码",
+    "register": "注册",
+    "success": "成功",
+    "logged_in": "您已登录。",
+    "invalid_credentials": "无效的邮箱或密码",
+    "registration_failed": "注册失败。"
 }

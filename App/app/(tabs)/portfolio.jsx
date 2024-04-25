@@ -37,8 +37,12 @@ import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import { useNavigation } from 'expo-router';
 import useFetchUserId from '~/components/hooks/FetchUserId';
+import i18next, { languageResources } from '../services/i18next';
+import { useTranslation } from 'react-i18next';
+import languagesList from '../services/languageList.json';
 
 export default function Screen() {
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
     const [selectedCrypto, setSelectedCrypto] = useState('BTC');
@@ -210,9 +214,9 @@ export default function Screen() {
                 getUserPortfolio();
                 getTotalAssets();
                 getTransactionHistory();
-                Alert.alert('Success', 'Crypto added to your portfolio.');
+                Alert.alert(t('add_crypto_success_title'), t('add_crypto_success_message'));
             } else {
-                Alert.alert('Error', 'Failed to add crypto to your portfolios.');
+                Alert.alert(t('add_crypto_error_title'), t('add_crypto_error_message'));
             }
         } catch (error) {
             console.error('Error:', error);
@@ -292,13 +296,13 @@ export default function Screen() {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16 }}>
                         <View style={{ alignItems: 'center' }}>
                             <Text style={{ fontSize: 20, fontWeight: '600' }}>${totalCost.toLocaleString()}</Text>
-                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>Cost</Text>
+                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>{t('cost')}</Text>
                         </View>
                         <View style={{ alignItems: 'center' }}>
                             <Text style={{ fontSize: 20, fontWeight: '600', color: totalAssets - totalCost < 0 ? 'red' : 'green' }}>
                                 {(totalAssets - totalCost).toFixed(2)}
                             </Text>
-                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>PNL</Text>
+                            <Text style={{ fontSize: 12, color: '#8E8E93' }}>{t('pnl')}</Text>
                         </View>
                     </View>
                     </CardContent>
@@ -328,7 +332,7 @@ export default function Screen() {
                                     <CardTitle  style={{color: item.roi < 0 ? 'red' : 'green'}}>
                                         {item.roi}%
                                     </CardTitle>
-                                    <CardDescription>ROI</CardDescription>
+                                    <CardDescription>{t('pnl_percentage')}</CardDescription>
                                 </View>
                             </View>
                         </CardContent>
@@ -344,15 +348,15 @@ export default function Screen() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle style={{ marginBottom: 12 }}>Add a Crypto to your Portfolio</AlertDialogTitle>
-                            <Text>Choose a Crypto to add to your assets</Text>
+                            <AlertDialogTitle style={{ marginBottom: 12 }}>{t('add_crypto')}</AlertDialogTitle>
+                            <Text>{t('choose_crypto')}</Text>
                             <Select defaultValue={{ value: selectedCrypto, label: 'Bitcoin' }} onValueChange={(value) => {
                                 setSelectedCrypto(value?.value);
                             }}>
                                 <SelectTrigger style={{ width: 250 }}>
                                     <SelectValue
                                         style={{ color: 'gray', fontSize: 14 }}
-                                        placeholder='Select a crypto'
+                                        placeholder={t('select_crypto')}
                                     />
                                 </SelectTrigger>
                                 <SelectContent style={{ width: 250 }}>
@@ -369,9 +373,9 @@ export default function Screen() {
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-                            <Text>Enter how much</Text>
+                            <Text>{t('enter_amount')}</Text>
                             <Input
-                                placeholder='Amount'
+                                placeholder={t('enter_amount')}
                                 value={inputValue}
                                 onChangeText={setInputValue}
                             />
@@ -379,10 +383,10 @@ export default function Screen() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>
-                                <Text>Cancel</Text>
+                                <Text>{t('cancel')}</Text>
                             </AlertDialogCancel>
                             <AlertDialogAction onPress={handleAddCrypto}>
-                                <Text>Add</Text>
+                                <Text>{t('add')}</Text>
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

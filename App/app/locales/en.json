@@ -8,5 +8,16 @@
     "select_crypto": "Select a crypto",
     "enter_amount": "Enter how much",
     "cancel": "Cancel",
-    "add": "Add"
+    "add": "Add",
+    "login": "Login",
+    "login_description": "Login to your CryptoTrackr account",
+    "signup_title": "Sign up",
+    "signup_description": "We don't save your password",
+    "email": "Email",
+    "password": "Password",
+    "register": "Register",
+    "success": "Success",
+    "logged_in": "You are logged in.",
+    "invalid_credentials": "Invalid email or password",
+    "registration_failed": "Registration failed."
 }

@@ -10,9 +10,7 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '~/components/primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
-import Screen from './(tabs)/Portfolio';
-// import i18next, {languageResources} from './services/ii8next';
-// import {useTranslation} from 'react-i18next';
+
 
 const LIGHT_THEME: Theme = {
   dark: false,
