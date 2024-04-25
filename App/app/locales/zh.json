@@ -23,5 +23,9 @@
     "add_crypto_success_title": "加密货币成功添加",
     "add_crypto_success_message": "加密货币已成功添加到您的投资组合中。",
     "add_crypto_error_title": "添加加密货币时出错",
-    "add_crypto_error_message": "添加加密货币时出错。请稍后重试。"
+    "add_crypto_error_message": "添加加密货币时出错。请稍后重试。",
+    "delete_crypto_success_title": "加密货币删除成功",
+    "delete_crypto_success_message": "加密货币已从您的投资组合中删除。",
+    "delete_crypto_error_title": "删除加密货币时出错",
+    "delete_crypto_error_message": "删除加密货币时出错。请稍后重试。"
 }

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
+import { SplashScreen, Stack } from 'expo-router';
 
 export default function TabLayout() {
   
@@ -22,6 +23,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
         }}
       />
+
     </Tabs>
   );
 }

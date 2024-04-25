@@ -35,7 +35,7 @@ import useToken from '~/components/hooks/Token';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
-import { useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import useFetchUserId from '~/components/hooks/FetchUserId';
 import i18next, { languageResources } from '../services/i18next';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,6 @@ import languagesList from '../services/languageList.json';
 export default function Screen() {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation();
     const [selectedCrypto, setSelectedCrypto] = useState('BTC');
     const [inputValue, setInputValue] = useState("");
     const { token } = useToken();
@@ -223,6 +222,27 @@ export default function Screen() {
         }
     };
 
+    const handleDeleteCrypto = async (cryptoSymbol) => {
+        try {
+            const response = await fetch(`http://159.65.21.195/api/CryptoPortfolio/deleteCryptoFromPortfolio/${userId}/${cryptoSymbol}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                getUserPortfolio();
+                getTotalAssets();
+                getTransactionHistory();
+                Alert.alert(t('delete_crypto_success_title'), t('delete_crypto_success_message'));
+            } else {
+                Alert.alert(t('delete_crypto_error_title'), t('delete_crypto_error_message'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
     const fetchAllPrices = async () => {
         try {
             await Promise.all(
@@ -235,17 +255,21 @@ export default function Screen() {
 
     const fetchPrice = async (cryptoSymbol) => {
         try {
-            const response = await fetch(`http://159.65.21.195/api/CryptoTransaction/getCryptoPrice/${cryptoSymbol}`);
+            const response = await fetch(`http://159.65.21.195/api/CryptoTransaction/getCryptoPrice/${cryptoSymbol}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
-                console.log("Crypto Prices:", data); // Add this line
+                console.log("Crypto Prices:", data);
                 setCryptoPrices(prevPrices => ({ ...prevPrices, [cryptoSymbol]: data }));
             }
         } catch (error) {
             console.error('Error fetching crypto prices:', error);
         }
     };
-
+    
     const getEntryPrice = (cryptoSymbol) => {
         const transactions = transactionHistory.filter(transaction => transaction.cryptoSymbol === cryptoSymbol);
         if (transactions.length > 0) {
@@ -272,7 +296,17 @@ export default function Screen() {
     (((totalAssets - totalCost) / totalCost) * 100).toFixed(2) :
     0;
 
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('token');
+            router.replace('/');
+        } catch (error) {
+            console.log('Error clearing token: ', error);
+        }
+    };
+
     return (
+        
         <ScrollView
             style={{ flex: 1, gap: 1, padding: 3 }}
             refreshControl={
@@ -282,7 +316,6 @@ export default function Screen() {
                 />
             }
         >
-
             <View>
             <Card className='w-full max-w-sm p-6 rounded-2xl'>
                     <CardHeader className='items-center'>
@@ -328,11 +361,22 @@ export default function Screen() {
 
                                     </View>
                                 </View>
-                                <View style={{ alignItems: 'flex-end' }}>
-                                    <CardTitle  style={{color: item.roi < 0 ? 'red' : 'green'}}>
-                                        {item.roi}%
-                                    </CardTitle>
-                                    <CardDescription>{t('pnl_percentage')}</CardDescription>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <View style={{ alignItems: 'flex-end' }}>
+                                        <CardTitle  style={{color: item.roi < 0 ? 'red' : 'green'}}>
+                                            {item.roi}%
+                                        </CardTitle>
+                                        <CardDescription>{t('pnl_percentage')}</CardDescription>
+                                    </View>
+                                    <View style={{ marginLeft: 'auto' }}>
+                                        <AntDesign 
+                                            name="closecircleo" 
+                                            size={24} 
+                                            color="red" 
+                                            onPress={() => handleDeleteCrypto(item.cryptoSymbol)} 
+                                            style={{ marginLeft: 'auto', padding: 10 }} 
+                                        />
+                                    </View>
                                 </View>
                             </View>
                         </CardContent>
@@ -392,6 +436,9 @@ export default function Screen() {
                     </AlertDialogContent>
                 </AlertDialog>
             </View>
+            <Button style={{backgroundColor: "#121212", marginTop: 100}} title="Logout" onPress={handleLogout}>
+                <Text style={{color: "white"}}>Logout</Text>
+            </Button>
         </ScrollView>
     );
 }
