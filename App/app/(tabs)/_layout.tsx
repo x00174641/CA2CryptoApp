@@ -13,16 +13,9 @@ export default function TabLayout() {
   
   return (
     <Tabs>
+
       <Tabs.Screen
-        name="LoginSignup"
-        options={{
-          title: 'LoginSignup',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="index"
+        name="portfolio"
         options={{
           title: 'Home',
           headerShown: false,

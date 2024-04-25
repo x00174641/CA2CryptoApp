@@ -10,7 +10,9 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '~/components/primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
-import Screen from './(tabs)/LoginSignup';
+import Screen from './(tabs)/Portfolio';
+// import i18next, {languageResources} from './services/ii8next';
+// import {useTranslation} from 'react-i18next';
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -67,9 +69,9 @@ export default function RootLayout() {
       <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
       <Stack>
         <Stack.Screen
-          name='(tabs)'
+          name='index'
           options={{
-            title: 'Rick Sanchez',
+            title: 'Portfolio',
             headerRight: () => <ThemeToggle />,
             headerTitleAlign: 'center',
 

@@ -11,7 +11,7 @@ const useFetchUserId = () => {
         const token = await AsyncStorage.getItem('token');
 
         if (token) {
-          const response = await fetch('http://10.0.2.2:5281/api/User/fetchId', {
+          const response = await fetch('http://159.65.21.195/api/User/fetchId', {
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`
