@@ -51,5 +51,10 @@ namespace CryptoApi.Repositories
         {
             return await _dbContext.SaveChangesAsync();
         }
+        
+        public void DeleteCryptoPortfolio(CryptoPortfolio cryptoPortfolio)
+        {
+            _dbContext.CryptoPortfolio.Remove(cryptoPortfolio);
+        }
     }
 }

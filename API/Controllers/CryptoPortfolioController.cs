@@ -163,5 +163,36 @@ namespace CryptoApi.Controllers
             }
         }
     }
+    [HttpDelete("deleteCryptoFromPortfolio/{userId}/{cryptoSymbol}")]
+    public async Task<ActionResult> DeleteCryptoFromPortfolio(string userId, string cryptoSymbol)
+    {
+        try
+        {
+            // Check if the user has holdings for this cryptocurrency
+            var existingPortfolio = _cryptoPortfolioRepository.GetCryptoPortfolioByUserIdAndSymbol(userId, cryptoSymbol);
+
+            if (existingPortfolio == null)
+            {
+                // If the cryptocurrency is not found in the user's portfolio, return a 404 Not Found response
+                return NotFound($"User {userId} does not own {cryptoSymbol} in their portfolio.");
+            }
+
+            // Remove the cryptocurrency from the user's portfolio
+            _cryptoPortfolioRepository.DeleteCryptoPortfolio(existingPortfolio);
+
+            await _cryptoPortfolioRepository.SaveChangesAsync();
+
+            return Ok($"Crypto {cryptoSymbol} has been successfully removed from the portfolio of user {userId}.");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            return StatusCode(500, $"An error occurred while deleting {cryptoSymbol} from the portfolio of user {userId}: {ex.Message}");
+        }
     }
+
+    
+    
+    }
+    
 }
