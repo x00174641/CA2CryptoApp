@@ -12,7 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     public DbSet<User> Users { get; set; }
-    public DbSet<Asset> Assets { get; set; }
+
     
     public DbSet<CryptoTransaction> CryptoTransactions { get; set; }
     
