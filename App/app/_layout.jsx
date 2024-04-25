@@ -5,12 +5,15 @@ import { Theme, ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Text } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '~/components/primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import languagesList from './services/languageList.json';
+import { useTranslation } from 'react-i18next';
+import i18next, { languageResources } from './services/i18next';
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -32,6 +35,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+  const { t } = useTranslation();
+  const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
     (async () => {
@@ -58,6 +63,11 @@ export default function RootLayout() {
     });
   }, []);
 
+  const changeLng = lng => {
+    i18next.changeLanguage(lng);
+    setVisible(false);
+  };
+
   if (!isColorSchemeLoaded) {
     return null;
   }
@@ -68,12 +78,32 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen
           name='index'
-          options={{
+          options={({ navigation }) => ({
             title: 'Portfolio',
-            headerRight: () => <ThemeToggle />,
+            headerRight: () => (
+              <Select defaultValue={{ value: i18next.language, label: languagesList[i18next.language].nativeName }} onValueChange={(value) => changeLng(value?.value)}>
+                <SelectTrigger style={{ width: 120, paddingHorizontal: 10 }}>
+                  <SelectValue
+                    style={{ color: 'gray', fontSize: 14 }}
+                    placeholder={t('select_language')}
+                  />
+                </SelectTrigger>
+                <SelectContent style={{ width: 120 }}>
+                  {Object.keys(languageResources).map((item) => (
+                    <SelectItem key={item} label={languagesList[item].nativeName} value={item}>
+                      <Text>
+                        {languagesList[item].nativeName}
+                      </Text>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ),
             headerTitleAlign: 'center',
-
-          }}
+            headerLeft: () => (
+              <ThemeToggle />
+            )
+          })}
         />
       </Stack>
       <PortalHost />

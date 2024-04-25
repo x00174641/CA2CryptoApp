@@ -38,9 +38,8 @@ import { Label } from '~/components/ui/label';
 import { useNavigation } from 'expo-router';
 import useFetchUserId from '~/components/hooks/FetchUserId';
 import { router } from 'expo-router';
-import i18next, {languageResources} from './services/i18next';
 import {useTranslation} from 'react-i18next';
-import languagesList from './services/languageList.json';
+
 
 export default function Screen() {
     const insets = useSafeAreaInsets();
@@ -169,24 +168,9 @@ export default function Screen() {
     };
     
     const {t} = useTranslation();
-    const changeLng = lng => {
-        i18next.changeLanguage(lng);
-        setVisible(false);
-      };
+
     return (
-        <View style={{ flex: 1, gap: 1, padding: 3 }}>
-            <FlatList
-            data={Object.keys(languageResources)}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={styles.languageButton}
-                onPress={() => changeLng(item)}>
-                <Text style={styles.lngName}>
-                  {languagesList[item].nativeName}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
+      
             <View>
                 <Tabs
                     value={value}
@@ -275,7 +259,6 @@ export default function Screen() {
                     </TabsContent>
                 </Tabs>
             </View>
-        </View>
     );
 }
 const styles = StyleSheet.create({

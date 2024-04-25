@@ -19,5 +19,9 @@
     "success": "成功",
     "logged_in": "您已登录。",
     "invalid_credentials": "无效的邮箱或密码",
-    "registration_failed": "注册失败。"
+    "registration_failed": "注册失败。",
+    "add_crypto_success_title": "加密货币成功添加",
+    "add_crypto_success_message": "加密货币已成功添加到您的投资组合中。",
+    "add_crypto_error_title": "添加加密货币时出错",
+    "add_crypto_error_message": "添加加密货币时出错。请稍后重试。"
 }
